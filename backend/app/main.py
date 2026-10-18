@@ -2,6 +2,7 @@ import os
 import logging
 import re
 import shutil
+import tempfile
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -59,8 +60,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+_DEFAULT_UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(_DEFAULT_UPLOAD_DIR)))
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    # Serverless runtimes such as Vercel have a read-only app directory.
+    UPLOAD_DIR = Path(tempfile.gettempdir()) / "uploads"
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 
