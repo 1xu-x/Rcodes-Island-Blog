@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Code Journey default cover</title>
+  <desc id="desc">Abstract black and yellow cover for Code Journey.</desc>
+  <rect width="1200" height="675" fill="#18181b"/>
+  <path d="M0 675L1200 0v675z" fill="#27272a"/>
+  <path d="M720 0h480v675H960z" fill="#eab308"/>
+  <path d="M0 120h1200M0 240h1200M0 360h1200M0 480h1200M0 600h1200" stroke="#3f3f46" stroke-width="2"/>
+  <path d="M220 86h260v260H220zM300 166h260v260H300z" fill="none" stroke="#eab308" stroke-width="14"/>
+  <text x="76" y="512" fill="#fafafa" font-family="Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="2">CODE</text>
+  <text x="80" y="596" fill="#eab308" font-family="Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="2">JOURNEY</text>
+</svg>

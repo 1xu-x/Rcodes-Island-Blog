@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: code-journey-api
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: ENVIRONMENT
+        value: production
+      - key: SEED_ON_STARTUP
+        value: "true"
+      - key: ENABLE_IMAGE_UPLOAD
+        value: "false"
+      - key: DB_POOL_RECYCLE
+        value: "240"
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PUBLIC_BASE_URL
+        fromService:
+          name: code-journey-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL

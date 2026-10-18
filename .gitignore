@@ -1,0 +1,41 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Local deployment runtime (database files, logs, temporary URLs)
+.runtime/
+*.log
+tools/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv/
+backend/uploads/
+*.egg-info/
+
+# SQLite 测试/本地调试数据库
+backend/*.db
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml

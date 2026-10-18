@@ -1,0 +1,98 @@
+name: Deploy frontend to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PAGES_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+      PAGES_BASE_PATH_OVERRIDE: ${{ vars.VITE_BASE_PATH }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Resolve frontend build variables
+        run: |
+          set -euo pipefail
+
+          api_base="${PAGES_API_BASE_URL%/}"
+          if [[ ! "$api_base" =~ ^https:// ]]; then
+            echo "::error::Set repository Actions variable VITE_API_BASE_URL to the Render HTTPS origin, for example https://code-journey-api.onrender.com"
+            exit 1
+          fi
+
+          repo_name="${GITHUB_REPOSITORY#*/}"
+          if [[ -n "${PAGES_BASE_PATH_OVERRIDE}" ]]; then
+            base_path="${PAGES_BASE_PATH_OVERRIDE}"
+          elif [[ "$repo_name" == "${GITHUB_REPOSITORY_OWNER}.github.io" ]]; then
+            base_path="/"
+          else
+            base_path="/${repo_name}/"
+          fi
+          [[ "$base_path" == /* ]] || base_path="/${base_path}"
+          [[ "$base_path" == */ ]] || base_path="${base_path}/"
+
+          {
+            echo "VITE_API_BASE_URL=$api_base"
+            echo "VITE_BASE_PATH=$base_path"
+            echo "VITE_IMAGE_UPLOAD_ENABLED=false"
+          } >> "$GITHUB_ENV"
+
+          echo "API origin: $api_base"
+          echo "Pages base: $base_path"
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Verify static image assets
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          test -f dist/images/avatar.png
+          test -f dist/images/covers/default.svg
+          test -f dist/images/posts/deployment-flow.svg
+          grep -Fq "${VITE_BASE_PATH}" dist/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

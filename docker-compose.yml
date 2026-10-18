@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      network: host
+    image: blog-frontend:latest
+    ports:
+      - "${PUBLIC_PORT:-8080}:80"  # 云服务器可直接把 PUBLIC_PORT 设为 80
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - blog_net
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      network: host
+    image: blog-backend:latest
+    restart: always
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,http://127.0.0.1:5173}
+      # 【关键修改4】从代码层面限制 Python 不要疯狂开线程
+      # 限制 AnyIO (FastAPI 依赖库) 的最大线程数，默认为 40，这里限制为 10
+      - ANYIO_WORKER_THREADS=10
+      # 限制数据库连接池
+      - DB_POOL_SIZE=5
+      - DB_MAX_OVERFLOW=5
+      - ENABLE_IMAGE_UPLOAD=${ENABLE_IMAGE_UPLOAD:-false}
+      # 设置时区为上海时间
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      - db
+    networks:
+      - blog_net
+
+  # 数据库服务
+  db:
+    # 降级到 5.7，只有 8.0 一半的内存占用
+    image: mysql:5.7
+    container_name: blog_db
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      # 设置时区
+      TZ: Asia/Shanghai
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - blog_net
+
+volumes:
+  db_data:
+
+networks:
+  blog_net:
+    driver: bridge

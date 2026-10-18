@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Image unavailable</title>
+  <desc id="desc">Placeholder shown when a legacy upload asset is unavailable.</desc>
+  <rect width="1200" height="675" fill="#f4f4f5"/>
+  <rect x="18" y="18" width="1164" height="639" fill="none" stroke="#18181b" stroke-width="12" stroke-dasharray="28 18"/>
+  <circle cx="600" cy="280" r="92" fill="none" stroke="#eab308" stroke-width="24"/>
+  <path d="M520 200l160 160M680 200L520 360" stroke="#18181b" stroke-width="18"/>
+  <text x="600" y="452" fill="#18181b" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="900">IMAGE UNAVAILABLE</text>
+  <text x="600" y="512" fill="#71717a" text-anchor="middle" font-family="monospace" font-size="26">请迁移旧上传文件或改用稳定静态资源</text>
+</svg>
